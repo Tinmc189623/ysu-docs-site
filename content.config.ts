@@ -1,23 +1,22 @@
 import { fileURLToPath } from 'node:url'
 import { defineCollection, defineContentConfig } from '@nuxt/content'
 
-// 文档的唯一来源是仓库里的 docs/public。站点这边不复制一份出来——
-// 复制出来的那份迟早会和原文不一致，而改文档的人不会记得同步两次。
+// 正文在站内，就是这个仓库里的 content/ 目录。
 //
-// 路径写成从本文件算起的绝对路径，不用 '../docs/public' 这种相对写法：
-// 那种写法要经过 process.cwd()，而构建时的 cwd 未必是站点目录。
-const docsDir = fileURLToPath(new URL('../docs/public', import.meta.url))
+// 之前这行指向仓库外面的 ../docs/public，那是错的：站点有自己的仓库，
+// 构建时不该往仓库外面看一眼。一旦那样写，部署平台只克隆这一个仓库时
+// 就找不到文件，而且要在两个仓库之间维持一份「必须一起改」的约束。
+//
+// 路径从本文件算起，说明它是仓库内的相对位置，不是相对当前工作目录。
+const contentDir = fileURLToPath(new URL('./content', import.meta.url))
 
 export default defineContentConfig({
   collections: {
     docs: defineCollection({
       type: 'page',
       source: {
-        cwd: docsDir,
+        cwd: contentDir,
         include: '**/*.md',
-        // docs/public/README.md 是那份文档集自己的目录页，
-        // 站点有独立的首屏，把它排除掉，免得两边说同一件事。
-        exclude: ['README.md'],
       },
     }),
   },

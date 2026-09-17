@@ -2,12 +2,15 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { docRoutes } from './app/data/navigation'
 
-// 版本号从仓库根的 version.toml 读，不在这里另写一份。
+// 页脚显示的内核版本号，从站内的 version.toml 读。
 //
-// 那个文件由人维护，格式就一个 [version] 段加几个键，所以不引 TOML 解析库。
-// 读不出来就报错——构建期读不到总比在页脚上显示一个假版本号强。
+// 这个文件在本仓库里，不指向外面——站点是独立仓库，构建时只该读自己带的
+// 东西，否则平台只克隆这一个仓库时会找不到文件。
+//
+// 格式就一个 [version] 段加几个键，所以不引 TOML 解析库。
+// 读不出来就报错——构建期读不到，总比在页脚上显示一个假版本号强。
 function readKernelVersion(): string {
-  const path = fileURLToPath(new URL('../version.toml', import.meta.url))
+  const path = fileURLToPath(new URL('./version.toml', import.meta.url))
   const text = readFileSync(path, 'utf8')
 
   let inVersionSection = false

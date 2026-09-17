@@ -5,7 +5,7 @@
 // 从「是什么」到「怎么建」再到「内部怎么走」，字母序会把它打乱。
 
 export interface NavItem {
-  /** 站内路径，与 docs/public 下的文件路径对应。 */
+  /** 站内路径，与 content/ 下的文件路径对应。 */
   path: string
   /** 侧边栏与分页器上显示的名字。 */
   title: string

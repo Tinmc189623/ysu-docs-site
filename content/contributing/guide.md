@@ -99,7 +99,7 @@ cargo run -p ysu-capi --example fetch_render -- https://example.com/ /tmp/out.pp
 
 ## 文档
 
-改了可见行为就要改文档。公开文档在 `docs/public/`，改 C ABI 的话 `capi/` 那几篇都要看一眼。
+改了可见行为就要改文档。公开文档在文档站的 `content/` 目录里，改 C ABI 的话 `capi/` 那几篇都要看一眼。
 
 文档里写「支持」的门槛是：代码里确实有这条路径，而且能被测试或截图验证。解析进来了但没人读的，一律写「未实现」。
 

@@ -3,7 +3,7 @@ import { neighboursOf, sectionOf } from '~/data/navigation'
 
 const route = useRoute()
 
-// 一页文档就是一篇 markdown。路径与 docs/public 下的文件一一对应，
+// 一页文档就是一篇 markdown。路径与 content/ 下的文件一一对应，
 // 取的键用 route.path，所以不存在找不到的情况——找不到就是那张清单里漏了。
 const { data: doc } = await useAsyncData(`doc:${route.path}`, () =>
   queryCollection('docs').path(route.path).first(),

@@ -1,12 +1,14 @@
 # YSU 文档站
 
-把 `docs/public/` 下那批 markdown 渲染成一个站点，用 Nuxt 4 建，产出静态 HTML。
+把 `content/` 下那批 markdown 渲染成一个站点，用 Nuxt 4 建，产出静态 HTML。
 
-这个目录得待在仓库里——正文是从 `../docs/public` 读的，单独把它拷走是构建不出来的。
+正文就在这个仓库里，构建时只读自己带的东西，不往仓库外面看——所以整个目录拷到哪都能构建出来。
 
 ## 正文从哪来
 
-**站内没有自己的正文。** `content.config.ts` 把内容源指向 `../docs/public`，构建时直接读那批 markdown。所以改文档改的是 `docs/public/` 下的文件，这个目录里不会多出一份副本，也就不会出现两份正文对不上的情况。
+正文在站内，就是仓库根的 `content/`。`content.config.ts` 把内容源指向它，构建时直接读那批 markdown。改文档改的就是这里的文件。
+
+早先这一行指向的是仓库外面的 `../docs/public`，那是错的：站点有自己的仓库，构建时不该往仓库外面看一眼。那样写的话，部署平台只克隆这一个仓库时就找不到文件，还得在两个仓库之间维持一份「必须一起改」的约束。
 
 站点自己只管三件事：目录顺序、版式、构建。
 
@@ -14,7 +16,7 @@
 
 `app/data/navigation.ts` 里写死了侧边栏的六个分组和每篇的显示名。顺序不按文件名字母排——那批文档的先后是有讲究的，从「是什么」到「怎么建」再到「内部怎么走」，字母序会把它打乱。
 
-新增一篇文档要做两件事：写进 `docs/public/<分组>/`，在 `navigation.ts` 的对应分组里加一行。漏了第二件的话，那篇文档不会被预渲染，也进不了侧边栏。
+新增一篇文档要做两件事：写进 `content/<分组>/`，在 `navigation.ts` 的对应分组里加一行。漏了第二件的话，那篇文档不会被预渲染，也进不了侧边栏。
 
 ## 命令
 
@@ -89,6 +91,10 @@ app/
   layouts/default.vue      页头 + 正文 + 页脚
   pages/index.vue          首屏，六个分组的入口
   pages/[...slug].vue      文档页
-content.config.ts          内容源指向 ../docs/public
+  pages/404.vue            404，一个被显式加进预渲染清单的真实路由
+content/                   正文，49 篇 markdown，分六个目录
+content.config.ts          内容源指向 ./content
 nuxt.config.ts             模块、预渲染、代码高亮主题、版本号
+scripts/make-404.mjs       构建收尾，把 404/index.html 复制成 404.html
+version.toml               页脚显示的内核版本号
 ```

@@ -39,7 +39,7 @@ function readKernelVersion(): string {
 export default defineNuxtConfig({
   compatibilityDate: '2026-09-17',
 
-  modules: ['@nuxt/content'],
+  modules: ['@nuxt/content', '@vercel/analytics'],
 
   css: ['~/assets/css/main.css'],
 

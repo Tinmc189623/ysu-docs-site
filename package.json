@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@nuxt/content": "3.16.0",
+    "@vercel/analytics": "^2.0.1",
     "better-sqlite3": "^13.0.3",
     "nuxt": "4.5.2",
     "serve": "^14.2.6",

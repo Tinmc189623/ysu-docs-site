@@ -1,0 +1,29 @@
+{
+  "title": "YSU 内核",
+  "description": "从字节到像素的六个阶段，一层一层往下走。",
+  "defaultOpen": true,
+  "pages": [
+    "pipeline",
+    "html-tokenizer",
+    "tree-construction",
+    "character-references",
+    "dom",
+    "css-tokenizer",
+    "css-parser",
+    "selectors",
+    "cascade-and-inheritance",
+    "computed-style",
+    "layout-box-model",
+    "layout-block-and-inline",
+    "layout-text",
+    "layout-flex",
+    "layout-table",
+    "paint-and-display-list",
+    "renderer",
+    "networking-and-encoding",
+    "address-and-builtin-pages",
+    "engine",
+    "support-status",
+    "known-limitations"
+  ]
+}

@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* 正文全是中文，字体栈换成原来站上那一套：优先系统中文字体，
+   落到西文字体只当兜底。改这两个变量会一并影响 Fumadocs 自己的组件，
+   它们用的就是 font-sans 与 font-mono。 */
+@theme {
+  --font-sans: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC',
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+}
+
+html {
+  /* 长短不一的页面切换时留出滚动条宽度，免得正文左右跳一下。 */
+  scrollbar-gutter: stable;
+}
+
+/* 搜索弹窗打开时 Fumadocs 会给 body 加 data-scroll-locked，并补一段
+   margin-right 来抵消滚动条。上面已经用 scrollbar-gutter 常驻预留了槽位，
+   那段补偿会多顶一次，这里归零。 */
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}

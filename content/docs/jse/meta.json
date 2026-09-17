@@ -1,0 +1,10 @@
+{
+  "title": "JSE",
+  "description": "JavaScript 引擎，词法与语法分析完成，运行期刚起步。",
+  "defaultOpen": true,
+  "pages": [
+    "overview",
+    "lexer-and-parser",
+    "status"
+  ]
+}

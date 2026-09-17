@@ -1,0 +1,11 @@
+{
+  "title": "YSU 渲染内核文档",
+  "pages": [
+    "introduction",
+    "getting-started",
+    "ysu",
+    "capi",
+    "jse",
+    "contributing"
+  ]
+}

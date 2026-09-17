@@ -1,7 +1,16 @@
 node_modules
-.nuxt
-.output
-.data
-dist
+
+# 正文编译的中间产物，跟 .next 一样是构建出来的，不进版本库
+.source
+.next
+out
+build
+next-env.d.ts
+
+*.tsbuildinfo
 *.log
 .DS_Store
+.env*.local
+
+# Vercel 的本地关联信息（项目 id、团队 id），不进版本库
+.vercel

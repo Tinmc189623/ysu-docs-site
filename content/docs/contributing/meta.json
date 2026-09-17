@@ -1,0 +1,10 @@
+{
+  "title": "参与",
+  "description": "改代码之前要知道的几件事，以及提交之前要跑的命令。",
+  "defaultOpen": true,
+  "pages": [
+    "guide",
+    "code-style",
+    "testing"
+  ]
+}

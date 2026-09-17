@@ -1,0 +1,15 @@
+{
+  "title": "构建与使用",
+  "description": "需要什么工具链、怎么把它编出来、编完怎么跑。",
+  "defaultOpen": true,
+  "pages": [
+    "prerequisites",
+    "build-rust",
+    "build-ui-linux",
+    "build-ui-other-platforms",
+    "running-vexo",
+    "keyboard-shortcuts",
+    "local-files-and-cli",
+    "troubleshooting"
+  ]
+}

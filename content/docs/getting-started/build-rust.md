@@ -1,9 +1,9 @@
 ---
 title: "构建 Rust 侧"
-description: "Rust 侧是一个 Cargo 工作区，五个成员：ysu（内核）、ysu-capi（C ABI）、jse（脚本引擎）、json、vexo（旧外壳）。"
+description: "Rust 侧是一个 Cargo 工作区，四个成员：ysu（内核）、ysu-capi（C ABI）、json、vexo（旧外壳）。"
 ---
 
-Rust 侧是一个 Cargo 工作区，五个成员：`ysu`（内核）、`ysu-capi`（C ABI）、`jse`（脚本引擎）、`json`、`vexo`（旧外壳）。
+Rust 侧是一个 Cargo 工作区，四个成员：`ysu`（内核）、`ysu-capi`（C ABI）、`json`、`vexo`（旧外壳）。
 
 ## 全都编一遍
 

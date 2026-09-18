@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <DocsLayout
       tree={source.getPageTree()}
-      // 关掉 tab。不关的话 Fumadocs 会把六个顶层分组折成横向 tab，
+      // 关掉 tab。不关的话 Fumadocs 会把四个顶层分组折成横向 tab，
       // 侧边栏一次只展开当前那一组，其余四十来篇要点两下才看得到。
       //
       // 整棵树摊开是原来那版的取舍，理由写在 DocsSidebar 的注释里：

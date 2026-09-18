@@ -28,7 +28,6 @@ cmake --build ui/build -j
 | 改渲染效果 | `crates/ysu/src/render/`，着色器在 `shaders.rs` |
 | 修 HTML 解析 | `crates/ysu/src/html/`，注意 html5lib 的回归 |
 | 改外壳行为 | `ui/src/` |
-| 扩展脚本引擎 | `crates/jse/src/` |
 
 ## 提交之前
 

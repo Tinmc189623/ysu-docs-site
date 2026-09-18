@@ -5,11 +5,6 @@
   "pages": [
     "prerequisites",
     "build-rust",
-    "build-ui-linux",
-    "build-ui-other-platforms",
-    "running-vexo",
-    "keyboard-shortcuts",
-    "local-files-and-cli",
     "troubleshooting"
   ]
 }

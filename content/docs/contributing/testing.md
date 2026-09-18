@@ -23,7 +23,6 @@ cargo test -p ysu layout
 | 位置 | 测试数 |
 | --- | --- |
 | `crates/ysu` | 447 |
-| `crates/jse` | 125 |
 | `crates/vexo` | 115 |
 | `crates/json` | 44 |
 | `crates/ysu-capi` | 14 |

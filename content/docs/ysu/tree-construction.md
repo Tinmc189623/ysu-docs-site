@@ -89,7 +89,7 @@ struct PendingTableText {
 SVG 与 MathML 的子树的处理规则：
 
 ```rust
-// crates/ysu/src/html/foreign.rs
+// src/html/foreign.rs
 pub fn adjust_svg_tag_name(name: &str) -> &str;
 pub fn adjust_svg_attributes(attributes: &mut [Attribute]);
 pub fn adjust_mathml_attributes(attributes: &mut [Attribute]);

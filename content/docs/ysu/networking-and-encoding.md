@@ -54,7 +54,7 @@ Stream::Tls(rustls::StreamOwned<ClientConnection, TcpStream>)
 
 303 的「把方法改成 GET」这条语义没有单独处理——因为本来就只用 GET。
 
-跟随之后的最终地址会回传给调用方，这一点在 C ABI 那边是有用的：补全页面里的相对链接要用最终地址。
+跟随之后的最终地址会回传给调用方。这一点有用：补全页面里的相对链接要用最终地址，而不是最初请求的那个。
 
 ## 限额
 
@@ -77,7 +77,7 @@ Stream::Tls(rustls::StreamOwned<ClientConnection, TcpStream>)
 
 **压缩完全不支持。** 请求不发 `Accept-Encoding`，响应里的 `Content-Encoding` 也不解。全仓对 `gzip`、`brotli`、`deflate` 零命中。
 
-后果是流量比主流浏览器大——HTML 的压缩比通常在 3 到 5 倍之间。
+后果是流量比压缩后大三到五倍——HTML 通常能压到这个程度。
 
 **Cookie 不支持。** 不存也不发。
 
@@ -107,7 +107,7 @@ pub fn sniff(bytes: &[u8], content_type: Option<&str>) -> /* ... */;
 pub fn decode(bytes: &[u8], encoding: /* ... */) -> String;
 ```
 
-实现在 `encoding_rs` 上，遇到非法字节做替换而不是 panic——一个编码声明写错的页面会显示成乱码加替换字符，但不会让浏览器崩掉。
+实现在 `encoding_rs` 上，遇到非法字节做替换而不是 panic——一个编码声明写错的页面会显示成乱码加替换字符，但不会让内核崩掉。
 
 编码名用 `Encoding::for_label` 识别，标签里只收字母、数字、减号、下划线。
 

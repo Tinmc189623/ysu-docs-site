@@ -1,9 +1,9 @@
 ---
 title: "内核门面"
-description: "Engine 把解析、样式、布局、绘制串起来。它是 Rust 侧的公开入口，C ABI 那一层包的就是它。27 条单元测试。"
+description: "Engine 把解析、样式、布局、绘制串起来。它是内核对外的唯一门面。27 条单元测试。"
 ---
 
-`Engine` 把解析、样式、布局、绘制串起来。它是 Rust 侧的公开入口，C ABI 那一层包的就是它。27 条单元测试。
+`Engine` 把解析、样式、布局、绘制串起来。它是内核对外的唯一门面。27 条单元测试。
 
 ## 状态
 
@@ -13,7 +13,7 @@ pub struct Engine {
 }
 ```
 
-它持有一次加载的全部状态。一个标签页一个实例，实例之间不共享任何东西——两个标签页打开同一个网址，各自解析、各自排版。
+它持有一次加载的全部状态。实例之间不共享任何东西——同一份 HTML 喂给两个实例，各自解析、各自排版。
 
 ## 生命周期
 
@@ -25,9 +25,9 @@ Engine::new(width, height)
        → 收集文档里的 <style> 与 <link rel="stylesheet">
        → 重建样式表
        → 重排
-  → stylesheet_links()          告诉外壳要取哪些外部样式表
+  → stylesheet_links()          报告还需要取哪些外部样式表
   → set_linked_stylesheet(url, css)   收一份就重建一次
-  → set_viewport(w, h) / set_zoom(zoom)   尺寸或缩放变了就重排
+  → set_viewport(w, h)          尺寸变了就重排
   → display_list() / display_list_region(visible)
   → element_at(x, y) / fragment_node_at(x, y)
 ```
@@ -42,7 +42,7 @@ impl Engine {
 }
 ```
 
-`load_html` 不带基准地址，页面里的相对链接用不了。外壳一律用 `load_html_with_base`。
+`load_html` 不带基准地址，页面里的相对地址补不全。要取回外部样式表就得用 `load_html_with_base`，否则 `stylesheet_links` 交回来的是原样的相对路径。
 
 加载做的事情是：解析成 DOM、收集样式来源、重建样式表、重排。**换文档时已取回的外部样式表会清空**——上一页的 `style.css` 不该被当成这一页的。
 
@@ -61,31 +61,29 @@ pub enum SheetSource {
 
 ## 外部样式表
 
-内核不取样式表，它只告诉外壳有哪些要取：
+内核不取样式表，它只报告有哪些要取：
 
 ```rust
 pub fn stylesheet_links(&self) -> Vec<String>;
 pub fn set_linked_stylesheet(&mut self, url: &str, css: &str);
 ```
 
-`stylesheet_links` 返回页面引用的全部地址。外壳逐个去取，每取回一份调一次 `set_linked_stylesheet`，内核重建样式表并重排。
+`stylesheet_links` 返回页面引用的全部地址。调用方逐个去取，每取回一份调一次 `set_linked_stylesheet`，内核重建样式表并重排。
 
 **不在引用列表里的 URL 会被忽略。** 这是防呆：拿一份陈旧的样式表回来说「这是第三份」，不应该被接受。
 
 **每收一份就重排一次。** 一份页面引三份样式表时，画面会变化三次。这是设计如此，不是渲染出错——逐步更新比等全部到齐再显示响应更快。
 
-## 视口与缩放
+## 视口
 
 ```rust
 pub fn set_viewport(&mut self, width: f64, height: f64);
-pub fn set_zoom(&mut self, zoom: f64);
+pub fn viewport(&self) -> (f64, f64);
 ```
 
-`set_viewport` 在尺寸没变化时直接返回，不重排。这条对性能有意义：窗口大小不变的重绘不该触发重新布局。
+`set_viewport` 在尺寸没变化时直接返回，不重排——尺寸不变的重绘不该触发重新布局。真的变了就重算样式再排一次，因为断行位置、百分比宽度、`vw` 与 `vh` 都要跟着变。
 
-缩放改的是**布局视口宽度**。`set_zoom(2.0)` 让内核按「视口宽度只有一半」去排版，而不是把画好的画面拉伸。所以放大之后文字变粗、换行位置变化。
-
-C ABI 那一层把缩放夹在 0.25 到 5.0 之间。
+**缩放不在这一层。** `Engine` 只认一个视口尺寸，没有独立的缩放参数。要让「放大」改变换行位置，就把变窄的尺寸传进来；`Renderer` 那边的 `set_view` 收的缩放管的是成像，两者不是一回事。
 
 ## 输出
 
@@ -101,27 +99,25 @@ pub fn layout_engine_mut(&mut self) -> &mut LayoutEngine;
 
 `display_list_region` 是滚动时用的：只生成落在可见范围内的命令。
 
-`document_height` 返回整页高度，外壳用它算滚动范围。
+`document_height` 返回整页高度，用来算滚动范围：视口之外还剩下多少内容。
 
-后面那几个返回内部结构的引用，是给测试和内部使用者用的。C ABI 不透出它们。
+后面那几个返回内部结构的引用，是给测试和内部使用者用的。
 
 ## 命中测试
 
 ```rust
-pub fn element_at(&self, x: f64, y: f64) -> Option<&LayoutBox>;
+pub fn element_at(&self, x: f64, y: f64) -> Option<NodeId>;
 pub fn fragment_node_at(&self, x: f64, y: f64) -> Option<NodeId>;
 ```
 
 两个方向。**链接命中用后者**：
 
 ```rust
-// crates/ysu/src/engine.rs
+// src/engine.rs
 //! 行内元素在盒子树里没有自己的盒子，只按盒子找不出「这一点压在哪个链接上」。
 ```
 
 `fragment_node_at` 找到压在该点上的文字片段，返回它的来源节点，调用方顺着它往上找祖先就是链接。
-
-C ABI 的 `ysu_engine_link_at` 用的是这一条。
 
 ## 一个使用例子
 
@@ -131,7 +127,8 @@ use ysu::Engine;
 let mut engine = Engine::new(1280.0, 800.0);
 engine.load_html_with_base("<h1>你好</h1>", "https://example.com/");
 
-println!("标题：{:?}", engine.document_height());
+println!("文档高度 {:.1}", engine.document_height());
+println!("样式表 {} 份", engine.stylesheets().len());
 
 for url in engine.stylesheet_links() {
     println!("需要取回：{url}");
@@ -139,7 +136,8 @@ for url in engine.stylesheet_links() {
 }
 
 let list = engine.display_list();
-println!("{}", list.summary());
+let (rects, borders, texts, images) = list.summary();
+println!("绘制命令 {} 条：矩形 {rects} 边框 {borders} 文字 {texts} 图片 {images}", list.len());
 ```
 
 ## 重排的代价
@@ -149,7 +147,6 @@ println!("{}", list.summary());
 - 加载新文档之后
 - 收下一份外部样式表之后
 - 视口尺寸真的变了之后
-- 缩放变了之后
 
 滚动**不触发它**。滚动只是换一套可见范围去取绘制命令。
 

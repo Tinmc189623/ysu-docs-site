@@ -58,7 +58,7 @@ npm run types:check  # next typegen && tsc --noEmit
 
 标题放进 frontmatter 的 `title`，**正文里不要再写 H1**，页面大标题由 Fumadocs 渲染。摘要同理放 `description`。
 
-指向别的文档的链接必须写成 `./` 或 `../` 开头，比如 `[已知限制](./known-limitations.md)`、`[线程模型](../capi/threading.md)`。Fumadocs 只解析这两种前缀，裸写文件名它会原样放过去，在浏览器里就成了相对当前地址的错链。解析工作由 `app/(docs)/[...slug]/page.tsx` 里挂的 `createRelativeLink` 做。
+指向别的文档的链接必须写成 `./` 或 `../` 开头，比如 `[已知限制](./known-limitations.md)`、`[层叠与继承](../ysu/cascade-and-inheritance.md)`。Fumadocs 只解析这两种前缀，裸写文件名它会原样放过去，在浏览器里就成了相对当前地址的错链。解析工作由 `app/(docs)/[...slug]/page.tsx` 里挂的 `createRelativeLink` 做。
 
 ## 给模型读的入口
 

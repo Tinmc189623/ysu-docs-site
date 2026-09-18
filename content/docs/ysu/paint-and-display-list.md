@@ -125,7 +125,7 @@ println!("{}", display_list.summary());
 
 `summary()` 打一份按类型统计的摘要，`all_text()` 把全部文字拼起来。
 
-`clip_to` 是给外壳把页面裁到工具栏以下用的，`translate` 是整体平移。
+`clip_to` 把内容裁到指定范围内，`translate` 是整体平移。
 
 ## 测试
 

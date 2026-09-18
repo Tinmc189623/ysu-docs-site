@@ -7,7 +7,7 @@ description: "&amp;、&#65;、&#x41; 这类写法。看起来是个小功能，�
 
 ## 表是生成的，不是手写的
 
-`crates/ysu/src/html/entities.rs` 有 **2231 条**具名引用。这个数字说明它不可能是手写的。
+`src/html/entities.rs` 有 **2231 条**具名引用。这个数字说明它不可能是手写的。
 
 ```rust
 //! HTML 具名字符引用表。
@@ -24,8 +24,8 @@ pub static NAMED_REFERENCES: &[(&str, &str)] = &[
 
 ```bash
 curl -sS -o /tmp/entities.json https://html.spec.whatwg.org/entities.json
-python3 crates/ysu/tools/generate_entities.py /tmp/entities.json \
-    crates/ysu/src/html/entities.rs
+python3 tools/generate_entities.py /tmp/entities.json \
+    src/html/entities.rs
 ```
 
 表按名字的字节序排列，查询走二分查找。

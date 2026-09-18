@@ -1,36 +1,37 @@
 ---
 title: "单向管线"
-description: "输入是一段 HTML 字节和一个基准地址，输出是一块 RGBA 像素。中间有六道工序，每一道的产物是下一道的输入。"
+description: "输入是一段 HTML 与它引用的样式，输出一串可以交给 GPU 的绘制命令。每一道的产物是下一道的输入。"
 ---
 
-输入是一段 HTML 字节和一个基准地址，输出是一块 RGBA 像素。中间有六道工序，每一道的产物是下一道的输入。
+输入是一段 HTML 与它引用的样式，输出一串可以交给 GPU 的绘制命令。每一道的产物是下一道的输入，中间没有回头路。
 
 ```
 html::Tokenizer     →  Token 流
-dom::TreeBuilder    →  Document（DOM 树）
+html::TreeBuilder   →  Document（节点树）
 css::Parser         →  StyleSheet
-style::Cascade      →  StyleMap（每个元素的计算样式）
+style::Cascade      →  StyleMap（每个节点的计算样式）
 layout::Tree        →  带几何的盒子树
 paint               →  DisplayList（绘制命令）
-render::Renderer    →  像素
+render::Renderer    →  wgpu 的绘制调用
 ```
 
 **每一步都能单独调用。** 写测试、查问题时可以从任意一环切进去，不用整条链跑一遍。想验选择器匹配，直接喂一段 CSS 和一棵 DOM；想验渲染，直接构造一个显示列表。
 
-`crates/ysu/src/lib.rs` 的模块文档里就画了这条线：
+`src/lib.rs` 的模块文档里也画着这条线，十个模块顺着它排：
 
 ```rust
-pub mod address;   // 地址栏输入的解析
-pub mod css;       // 词法、选择器、值与规则解析
-pub mod dom;       // 节点树与查询
-pub mod engine;    // 门面，把下面这些串起来
-pub mod html;      // 词法分析、字符引用解码与树构建
-pub mod layout;    // 盒子树与布局
-pub mod net;       // HTTP/1.1、TLS、字符集嗅探
-pub mod pages;     // 内核自己提供的页面
-pub mod paint;     // 绘制命令的生成
-pub mod render;    // wgpu 渲染器
-pub mod style;     // 从匹配到的声明算出最终属性值
+pub mod address;
+pub mod css;
+pub mod dom;
+pub mod engine;
+pub mod html;
+pub mod layout;
+pub mod net;
+pub mod paint;
+pub mod render;
+pub mod style;
+
+pub use engine::Engine;
 ```
 
 ## 数据在每一道长什么样
@@ -51,12 +52,7 @@ pub mod style;     // 从匹配到的声明算出最终属性值
 
 ## 为什么是单向的
 
-```rust
-// crates/ysu/src/lib.rs
-pub use engine::Engine;
-```
-
-`Engine` 是这条线的门面。它持有文档、样式表、布局树，按顺序推进，并在需要的时候报告「页面还引用了哪些外部样式表」。
+`Engine` 是这条线的门面，`lib.rs` 里一句 `pub use engine::Engine` 把它提到 crate 根。它持有文档、样式表、布局树，按顺序推进，并在需要的时候报告「页面还引用了哪些外部样式表」。
 
 单向意味着每一层不需要知道上面发生了什么。布局不用管样式表是从 `<style>` 来的还是从网络取回来的——它拿到 `StyleMap` 就干活。绘制不用管盒子是怎么算出来的——它遍历树，生成命令。
 
@@ -76,27 +72,22 @@ pub use engine::Engine;
 
 `DisplayList` 是个典型的例子：一串 enum，每个变体带自己的字段，`Text` 命令里放的是 `String` 而不是切片。代价是每帧多做几次分配；收益是它可以被构造、被比较、被单元测试、被写进调试输出。
 
-`printable.rs` 那样的调试设施能成立，靠的就是这一点。
+`render_demo` 那个例子能把命令总数、以及矩形、边框、文字、图片各多少条直接打出来，靠的也是这一点。
 
-## 一次渲染的完整路径
+## 一次滚动的完整路径
 
-拿外壳里的一次滚动举例：
+滚动不重算布局，只是换一套可见范围去取绘制命令：
 
 ```
-滚轮事件
-  → Viewport::wheelEvent 改滚动位置
-  → ysu_engine_render(engine, scroll_x / zoom, scroll_y / zoom)
-       → Engine::display_list_region(可见范围)
-            → 遍历布局树
-            → Painter 只生成落在可见范围内的命令
-       → Renderer::render(display_list, viewport, scroll, zoom, scale)
-            → 顶点在着色器里按 (页面坐标 - 滚动) * 缩放 * 像素比 变换
-            → 按裁剪范围切批次
-            → 画进离屏纹理
-            → 读回 CPU 内存
-  → 外壳用 QImage 包住像素贴到部件上
+Engine::display_list_region(可见范围)
+  → 遍历布局树
+  → Painter 只生成落在可见范围内的命令
+  → Renderer::render(...)
+       → 顶点按滚动量与缩放变换
+       → 按裁剪范围切批次
+       → 画进目标纹理
 ```
 
-注意第 3 步：布局没有重算。滚动只是换了一套可见范围去取绘制命令。
+看第一行：布局没有参与。滚动只是换一套可见范围。
 
-改视口尺寸或者改缩放就不同了——那两条会触发重新布局，因为断行位置会变。
+改视口尺寸或者改缩放就不同了——那两条会触发重新布局，因为断行位置会变。改视口走 `Engine::set_viewport`，它把新尺寸交给布局引擎，重新算一遍样式与布局。

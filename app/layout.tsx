@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: `%s · ${appName}`,
   },
   description:
-    'YSU 渲染内核的文档：HTML 与 CSS 解析、DOM、样式、布局、绘制、渲染与网络各层的实现说明，以及 C ABI 参考。',
+    'YSU 渲染内核的文档：HTML 与 CSS 解析、DOM、样式、布局、绘制、渲染与网络各层的实现说明。',
 }
 
 /**

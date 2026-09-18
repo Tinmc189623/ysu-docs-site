@@ -1,9 +1,9 @@
 ---
 title: "块级与行内布局"
-description: "布局引擎里最核心的两个格式化上下文。crates/ysu/src/layout/engine.rs 有 32 条单元测试。"
+description: "布局引擎里最核心的两个格式化上下文。src/layout/engine.rs 有 32 条单元测试。"
 ---
 
-布局引擎里最核心的两个格式化上下文。`crates/ysu/src/layout/engine.rs` 有 32 条单元测试。
+布局引擎里最核心的两个格式化上下文。`src/layout/engine.rs` 有 32 条单元测试。
 
 ## 入口
 

@@ -104,7 +104,7 @@ mark { background-color: yellow; color: black; }
 
 几个细节：
 
-- `body { margin: 8px }`——就是浏览器默认那圈白边
+- `body { margin: 8px }`——就是默认样式表带来的那圈白边
 - `head, title, meta, link, style, script` 那一堆 `display: none`，这是为什么它们不出现在画面上
 - `hr { border: 1px inset }` 里 `inset` 现在解析不了（边框样式关键字只识别几种），所以 `hr` 画不出线
 - `ul, ol` 的 `padding-left: 40px` 是项目符号能显示出来的原因
@@ -155,7 +155,7 @@ pub fn for_root() -> Self {
 pub fn with_state(mut self, state: ElementState) -> Self;
 ```
 
-匹配 `:hover` 这类伪类时要用。现在外壳不提供任何状态（全为假），所以 `:hover` 规则不会命中。
+匹配 `:hover` 这类伪类时要用。现在没有任何地方提供状态（四项全为假），所以 `:hover` 规则不会命中。
 
 ## 样式表是怎么攒起来的
 

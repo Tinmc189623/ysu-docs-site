@@ -40,7 +40,7 @@
 
 **标题放 frontmatter，正文里不要再写 H1。** 页面上的大标题由 Fumadocs 从 `title` 渲染。
 
-**指向别的文档的链接要写成 `./` 或 `../` 开头。** 比如 `[已知限制](./known-limitations.md)`、`[线程模型](../capi/threading.md)`。Fumadocs 只解析这两种前缀，裸写的 `known-limitations.md` 它会原样放过去，在浏览器里就成了相对当前地址的错链。`(docs)/[...slug]/page.tsx` 里挂的 `createRelativeLink` 负责把它解析成站内路由。
+**指向别的文档的链接要写成 `./` 或 `../` 开头。** 比如 `[已知限制](./known-limitations.md)`、`[层叠与继承](../ysu/cascade-and-inheritance.md)`。Fumadocs 只解析这两种前缀，裸写的 `known-limitations.md` 它会原样放过去，在浏览器里就成了相对当前地址的错链。`(docs)/[...slug]/page.tsx` 里挂的 `createRelativeLink` 负责把它解析成站内路由。
 
 ## 命令
 

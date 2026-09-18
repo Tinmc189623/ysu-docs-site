@@ -1,51 +1,55 @@
 ---
-title: "构建 Rust 侧"
-description: "Rust 侧是一个 Cargo 工作区，四个成员：ysu（内核）、ysu-capi（C ABI）、json、vexo（旧外壳）。"
+title: "构建"
+description: "一条 cargo build 编完，四个例子能出数字能出像素，测试跑得上。"
 ---
-
-Rust 侧是一个 Cargo 工作区，四个成员：`ysu`（内核）、`ysu-capi`（C ABI）、`json`、`vexo`（旧外壳）。
-
-## 全都编一遍
 
 ```bash
 cargo build --release
 ```
 
-产出在 `target/release/`。这一步会把 `crates/vexo` 也一起编——那个旧外壳还留在工作区里。
-
-## 只编内核与静态库
-
-外壳需要的是 `libysu_capi.a`，可以单独编：
-
-```bash
-cargo build --release -p ysu-capi
-```
-
-产物 `target/release/libysu_capi.a` 就是 C++ 外壳要链的东西。
-
-`ysu-capi` 的 crate 类型是 `["staticlib", "rlib"]`。静态库给 C++ 用；rlib 让 `examples/` 下的例子能在 Rust 里直接调同一套 ABI 函数——不经过 C 编译器，走的是同一份二进制接口。
-
-> 改了 C ABI 的任何签名之后必须重新跑这条命令。外壳可能还链着旧库，启动时版本号对不上会弹对话框直接退出。那是故意的：参数错位的调用比退出危险得多。
+产物落在 `target/release/`。`.gitignore` 忽略 `/target`，构建产物不进版本库。
 
 ## 测试
 
 ```bash
-cargo test --workspace
+cargo test
 ```
 
-按名字跑单条：
+跑名字里带某个词的：
 
 ```bash
-cargo test -p ysu caption_is_placed_inside_table
+cargo test layout
 ```
 
-内核的 html5lib 用例单独一个测试目标，跑起来慢一些：
+html5lib 那套用例是单独一个测试目标，跑起来慢一些：
 
 ```bash
-cargo test -p ysu --test html5lib_tree
+cargo test --test html5lib_tree
 ```
 
-失败时会把前若干条详情写进 `target/html5lib-failures.txt`，比在终端里滚屏方便。
+**这套用例现在是红的**，它报的是真实差距，不是构建坏了。失败详情写在 `CARGO_TARGET_TMPDIR/html5lib-failures.txt`。哪些还没过、为什么，见[测试](../contributing/testing.md)。
+
+## 例子
+
+四个例子，各管一段：
+
+```bash
+cargo run --example fetch_probe -- https://example.com/
+cargo run --example render_demo
+cargo run --example render_headless
+cargo run --example render_real_page -- https://example.com/
+```
+
+| 例子 | 做什么 | 要不要网络 |
+| --- | --- | --- |
+| `fetch_probe` | 发一次请求，打印状态、重定向次数、正文长度、`content-type` | 要 |
+| `render_demo` | 加载一段内置演示页，打印文档高度、样式表份数、绘制命令条数 | 不要 |
+| `render_headless` | 建 GPU 设备、渲到纹理、回读像素并核对关键位置 | 不要 |
+| `render_real_page` | 取一个真实网站走完整条链，打印各阶段耗时与文字片段的行位置 | 要 |
+
+改内核的时候，反复开窗口看效果是最慢的一条路。`render_headless` 不用窗口也不用网络，它自己核对像素，着色器、图集、批次划分出了差错它就会报出来——最快的那个是它。`render_demo` 看的是数字，适合确认结构与命令条数有没有突变。
+
+这几个例子都不写图片文件，输出全在终端里。
 
 ## 格式化与静态检查
 
@@ -54,52 +58,4 @@ cargo fmt --all
 cargo clippy --workspace --all-targets
 ```
 
-`rustfmt.toml` 定死 `max_width = 100`，别的都是默认值。提交之前这两条都应该干净——clippy 无警告是这个项目的硬要求。
-
-## 不看窗口看渲染结果
-
-改内核的时候，反复开窗口看效果是最慢的一条路。两个例子走的是和外壳完全相同的 C ABI，出图到文件：
-
-```bash
-# 对照页渲染成图片。参数：输出路径、设备像素比、第三位传 home 换成起始页、滚动位置
-cargo run -p ysu-capi --example dump_frame -- /tmp/frame.ppm 1.0 home 200
-
-# 完整走一遍外壳的加载流程：取页面、取它引用的样式表、应用、渲染
-cargo run -p ysu-capi --example fetch_render -- https://example.com/ /tmp/out.ppm
-```
-
-第一条用的是内置的对照页，不联网，跑得快。它上面有圆角、行内块、表格，适合看版式改动有没有把别处弄坏。
-
-第二条会真的发网络请求，并且把取回的 HTML 原样存一份到 `/tmp/fetched.html`——对比「取回来的东西对不对」和「画出来的东西对不对」时很有用。
-
-输出是 PPM。多数图片查看器直接就认，不认的话转一下：
-
-```bash
-convert /tmp/frame.ppm /tmp/frame.png
-```
-
-内核自己的 `examples/` 下还有四个例子，直接以 Rust 调内核，不过 C ABI：
-
-```bash
-cargo run -p ysu --example render_demo
-```
-
-## 内核开发时的常用组合
-
-```bash
-cargo test -p ysu layout            # 跑名字里带 layout 的测试
-cargo run -p ysu-capi --example dump_frame -- /tmp/a.ppm 2.0 home 0   # 高分屏下的排版
-```
-
-设备像素比传 2.0 再传 1.0，两张图的**高度必须一样**。高度一样说明断行位置没变，也就是排版没被像素比影响；只有成像分辨率变了。这条是内核里最容易搞错的换算之一。
-
-## 构建产物
-
-| 路径 | 是什么 |
-| --- | --- |
-| `target/release/libysu_capi.a` | C ABI 静态库，外壳链它 |
-| `target/release/libvexo` | 旧 Rust 外壳的可执行文件 |
-| `target/debug/` | 调试构建，外壳找不到 release 库时会退回这里 |
-| `target/html5lib-failures.txt` | html5lib 用例失败时的详情 |
-
-`.gitignore` 忽略 `/target`，但**没有**忽略 `ui/build/`。在外壳目录里构建之前注意这一点。
+`rustfmt.toml` 定死四件事：edition 2024、`max_width = 100`，以及两个简写开关（字段初始化与 `?` 运算符的简写形式）。除此之外都是默认值。

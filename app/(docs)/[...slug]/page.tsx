@@ -55,7 +55,7 @@ export default async function Page({ params }: DocPageProps) {
         <MDX
           components={getMDXComponents({
             // 正文里写的是相对的 `.md` 链接（`./known-limitations.md`、
-            // `../capi/threading.md`），靠它解析成站内路由。
+            // `../ysu/cascade-and-inheritance.md`），靠它解析成站内路由。
             // Fumadocs 只认带 `./` 或 `../` 前缀的形式，所以正文里那批
             // 裸写的文件名在迁移时已经补齐了前缀。
             a: createRelativeLink(source, page),

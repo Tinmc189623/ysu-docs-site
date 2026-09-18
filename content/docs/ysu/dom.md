@@ -141,7 +141,7 @@ impl Document {
 
 现在需要按选择器找元素的地方是样式层——`cascade.rs` 遍历整棵树，对每个元素跑一遍选择器匹配。它不需要 `querySelector` 这个接口。
 
-`title()` 是从文档里取 `<title>` 的内容，外壳用它设窗口标题。
+`title()` 从文档里取 `<title>` 的内容。
 
 ## 文本内容
 
